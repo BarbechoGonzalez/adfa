@@ -30,7 +30,8 @@ static float sentido=M_PI;
 /**
 * \brief Default constructor
 */
-SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx){
+SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
+{
 	connect(Start, SIGNAL(clicked()), this, SLOT(iniciar()));
 	connect(Stop, SIGNAL(clicked()), this, SLOT(parar()));
 	connect(&clk, SIGNAL(senal()), this, SLOT(reloj()));
@@ -41,6 +42,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx){
 	giro=false;
 	rot=1.2;
 	clk.start();
+	st=State::INIT;
 }
 
 /**
@@ -48,7 +50,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx){
 */
 SpecificWorker::~SpecificWorker(){}
 
-bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params){
+bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
+{
 	timer.start(Period);
 	return true;
 }
@@ -81,37 +84,65 @@ int SpecificWorker::getdistmin(int dismax,float angle)
 
 void SpecificWorker::compute()
 {
-  moverse();
-//   newAprilTag(new tag(tags_proxy->) );
-  gototag();
+//   TBaseState state;
+//   differentialrobot_proxy->getBaseState(state);
+//   qDebug()<<state.alpha<<state.x<<state.z;
+//   moverse();
+//   gototag();
   
+	if(startbutton){
+		switch(st){
+		  case State::INIT:
+			moverse();
+			break;
+		  case State::SEARCH:
+			search();
+			break;
+		}
+	}
 }
 void SpecificWorker::getAprilTags()
 {
 }
 
-void SpecificWorker::gototag()
-{
-	static int cont_tag=0;
-	  if(marcas.contains(cont_tag)){
-	
-		Marca m=marcas.get(cont_tag);
-		qDebug() << m.id;
-		writeinfo("El tag "+ to_string(m.id)+" esta en la posicion:");
-		writeinfo("x = "+to_string(m.x));
-		writeinfo("z = "+to_string(m.z));
-// 		writeinfo("y = "+to_string(m.y));
-// 		writeinfo("rx = "+to_string(m.rx));
-// 		writeinfo("rz = "+to_string(m.rz));
-// 		writeinfo("ry = "+to_string(m.ry));
-		cont_tag++;
-	}
-}
+// void SpecificWorker::gototag()
+// {
+// 	static int cont_tag=0;
+// 	static int cont=0;
+// 	if(marcas.contains(cont_tag)){
+// 		cont++;
+// 		TBaseState state;
+// 		differentialrobot_proxy->getBaseState(state);
+// 		Marca m=marcas.get(cont_tag);
+// 		if(cont==100){
+// 			qDebug() << m.id;
+// 			writeinfo("Redirigiendo al tag "+ to_string(m.id)+" esta en la posicion:");
+// 			writeinfo("x = "+to_string(m.x));
+// 			writeinfo("z = "+to_string(m.z));
+// 			int aux_z=m.z-state.z;
+// 			int aux_x=m.x-state.x;
+// 			float beta=acos(aux_z/(sqrt(aux_x*aux_x+aux_z*aux_z)));
+// 			beta=beta-state.alpha;
+// 			differentialrobot_proxy->setSpeedBase(0,beta);
+// 			usleep(1000000);
+// 			cont=0;
+// 		}
+// 		
+// 		if(state.x-m.x<800 && abs(state.z-m.z)<800){
+// 			cont_tag++;
+// 			writeinfo("Hemos llegado al tag "+ to_string(m.id));
+// 			writeinfo("x = "+to_string(m.x));
+// 			writeinfo("z = "+to_string(m.z));
+// 		}
+// 	}
+// }
+
 bool SpecificWorker::esquina()
 {
 	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
 	return (ldata.data()+cota)->dist<distsecurity&&((ldata.data())+100-cota)->dist<distsecurity;
 }
+
 void SpecificWorker::accionEsquina()
 {
 	writeinfo("¡¡¡Esquina!!!");
@@ -126,8 +157,7 @@ void SpecificWorker::accionEsquina()
 }
 
 void SpecificWorker::accionNoEsquina()
-{	
-	static int cont;		//CONTROL DEL GIRO ALEATORIO
+{	static int cont;		//CONTROL DEL GIRO ALEATORIO
 
 	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
 	std::sort( ldata.begin()+cota, ldata.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
@@ -154,13 +184,12 @@ void SpecificWorker::accionNoEsquina()
 		}
 	else
 	differentialrobot_proxy->setSpeedBase(vel, 0);
-
-	}
 /*=====================INFORMACION EN EL QTEXTEDIT====================*/
 // 				writeinfo("Velocidad lineal = "+to_string(vel));
 // 				writeinfo("Velocidad de rotacion = "+to_string(rot));
 /*====================================================================*/
-
+	}
+  
 }
 void SpecificWorker::pintarRobot()
 {
@@ -168,31 +197,60 @@ void SpecificWorker::pintarRobot()
 	differentialrobot_proxy->getBaseState(state);	
 	scene->addRect(state.x/10,-state.z/10,40,40,QPen(Qt::black),QBrush(Qt::black));
 }
+void SpecificWorker::search()
+{
+	static int cont_tag=0;
+	if(marcas.contains(cont_tag)){
+		Marca m=marcas.get(cont_tag);
+		TBaseState state;
+		differentialrobot_proxy->getBaseState(state);
+		RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
+		std::sort( ldata.begin()+cota, ldata.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
+		float distaux=(ldata.data()+cota)->dist;
+		int distmax=0;
+		int vel=getvelocidadl(distmax,distaux);
+		float rot=m.ry;
+		differentialrobot_proxy->setSpeedBase(vel,rot);
+		writeinfo("Redirigiendo al tag "+ to_string(m.id)+" esta en la posicion:");
+		writeinfo("x = "+to_string(m.x));
+		writeinfo("z = "+to_string(m.z));
+		if(abs(m.x)<1&&abs(m.z)<1){
+			cont_tag++;
+			accionEsquina();
+			writeinfo("Hemos llegado al tag "+ to_string(m.id));
+			writeinfo("x = "+to_string(m.x));
+			writeinfo("z = "+to_string(m.z));
+			st=State::INIT;
+		}
+	}
+	else 
+	  st=State::INIT;
+	  
+}
 
 void SpecificWorker::moverse()
 {
-	if(startbutton){
-		try{
-			
-/*=================================DETECTA LAS ESQUINAS===================================*/
-			if(esquina())
-			{
-				accionEsquina();
-			}
-/*========================================================================================*/
-/*==================================SI NO ES UNA ESQUINA==================================*/
-			else
-			{
-				accionNoEsquina();
-			}
-/*=============DIBUJO PASO DEL ROBOT QTGRAFICSVIEW====================*/
+	try
+	{
+  /*=================================DETECTA LAS ESQUINAS===================================*/
+		if(esquina())
+		{
+			accionEsquina();
+		}
+  /*========================================================================================*/
+  /*==================================SI NO ES UNA ESQUINA==================================*/
+		else
+		{
+			accionNoEsquina();
+		}
+  /*=============DIBUJO PASO DEL ROBOT QTGRAFICSVIEW====================*/
 		pintarRobot();
-/*====================================================================*/
-		}
-		catch(const Ice::Exception &ex){
-			writeinfo("ex");
-		}
-    }
+  /*====================================================================*/
+	}
+	catch(const Ice::Exception &ex)
+	{
+		writeinfo("ex");
+	}
   
 }
 
@@ -203,7 +261,7 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
 	differentialrobot_proxy->getBaseState(State);
 	marcas.add(t,State);
   }
-	
+	st=State::SEARCH;
 }
 
 void SpecificWorker::reloj()
@@ -229,7 +287,6 @@ void SpecificWorker::reloj()
 		}
 	}
 }
-
 void SpecificWorker::iniciar()
 {
 	startbutton=true;
@@ -244,3 +301,4 @@ void SpecificWorker::writeinfo(string _info)
 	QString *text=new QString(_info.c_str());
 	InfoText->append(*text);
 }
+  

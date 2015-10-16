@@ -48,7 +48,8 @@ Q_OBJECT
 	float rot;		//VELOCIDAD DE GIRO rad/s
 	bool startbutton;	//BOTON DE STARTINICIADO
 	QGraphicsScene *scene;	//GRAFICOS DEL ROBOT
-
+	enum class State  { INIT, SEARCH} ;  
+	State st;
 
 public:
 	SpecificWorker(MapPrx& mprx);	
@@ -61,7 +62,7 @@ public slots:
 	void reloj();
 
 private:
-  
+	void search();
 	void pintarRobot();
 	void accionNoEsquina();
 	void accionEsquina();
@@ -74,19 +75,21 @@ private:
 	float getvelocidadg(float angle, int dismax, int dis);
 	void writeinfo(string _info);
 	void newAprilTag(const tagsList &tags);
-	void gototag();
+// 	void gototag();
 	struct Marca
 	      {	
 		
 		Marca(TBaseState State, int _id, float _z, float _x, float _y, float _rx, float _ry, float _rz)
 		{
 			id=_id;
-// 			qDebug()<<id<< _id;
-			float alpha=atan2(State.x,State.z);
-			qDebug()<<State.alpha;
-			x=State.x+cos(alpha)*_x-sin(alpha)*_z;
-			z=State.z+sin(alpha)*_x+cos(alpha)*_z+337;
-			y=0;
+// 			int cx=State.x+sin(State.alpha)*180;
+// 			int cz=State.z+cos(State.alpha)*180;
+// 			
+// 			x=State.x+cos(State.alpha)*_x+sin(State.alpha)*_z;
+// 			z=State.z-sin(State.alpha)*_x+cos(State.alpha)*_z;
+			x=_x;
+			z=_z;
+			y=_y;
 			rx=_rx;
 			rz=_rz;
 			ry=_ry;
@@ -109,12 +112,13 @@ private:
 		Marca m(State,t.id, t.tz, t.tx, t.ty, t.rx, t.ry, t.rz);
 		QMutexLocker ml(&mutex);
 		lista.insert(t.id,m);
-// 		qDebug()<<lista.find(t.id).value().id;
 	      };
 	      Marca get(int id)
 	      {
 		QMutexLocker ml(&mutex);
-		return lista.find(id).value();
+		Marca m=lista.find(id).value();
+		lista.remove(id);
+		return m;
 	      };
 	      bool contains(int id)
 	      {
