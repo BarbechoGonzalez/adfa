@@ -157,7 +157,8 @@ void SpecificWorker::accionEsquina()
 }
 
 void SpecificWorker::accionNoEsquina()
-{	static int cont;		//CONTROL DEL GIRO ALEATORIO
+{	
+// 	static int cont;		//CONTROL DEL GIRO ALEATORIO
 
 	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
 	std::sort( ldata.begin()+cota, ldata.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
@@ -165,25 +166,18 @@ void SpecificWorker::accionNoEsquina()
 	float angle=(ldata.data()+cota)->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
 
 	int distmax=getdistmin(threshold,angle);			//CALCULA LA DISTANCIA A LA QUE DEBE DE GIRAR
-	rot=getvelocidadg(angle,distmax,distaux);		//CALCULA EL ANGULO DE GIRO
 	int vel=getvelocidadl(distmax,distaux);			//CALCULA LA VELOCIDAD LINEAL
 
 	if(rot<0)
 		giro=false;						//CONTROL DEL SENTIDO DE GIRO
 
-	if((ldata.data()+cota)->dist<distmax)
+	if((ldata.data()+cota)->dist<distmax){
+		rot=getvelocidadg(angle,distmax,distaux);		//CALCULA EL ANGULO DE GIRO
 		differentialrobot_proxy->setSpeedBase(vel, rot);	//ESTABLECE LA VELOCIDAD Y LA ROTACION SI SE INCUMPLE LA DISTANCIA
+	}
 /*===========================GIRA CUANDO ESTA EN UNA DISTANCIA DE SEGURIDAD===============================*/
 	else{
-		cont++;
-		if (cont==200){
-			rot=rand()%100 -4;
-			differentialrobot_proxy->setSpeedBase(vel, rot/10);
-			usleep(rand()%(250000));
-			cont=0;
-		}
-	else
-	differentialrobot_proxy->setSpeedBase(vel, 0);
+		differentialrobot_proxy->setSpeedBase(vel, 0);
 /*=====================INFORMACION EN EL QTEXTEDIT====================*/
 // 				writeinfo("Velocidad lineal = "+to_string(vel));
 // 				writeinfo("Velocidad de rotacion = "+to_string(rot));
@@ -209,14 +203,15 @@ void SpecificWorker::search()
 		float distaux=(ldata.data()+cota)->dist;
 		int distmax=0;
 		int vel=getvelocidadl(distmax,distaux);
-		float rot=m.ry;
+		float rot=m.ry/2;
 		differentialrobot_proxy->setSpeedBase(vel,rot);
-		writeinfo("Redirigiendo al tag "+ to_string(m.id)+" esta en la posicion:");
-		writeinfo("x = "+to_string(m.x));
-		writeinfo("z = "+to_string(m.z));
-		if(abs(m.x)<1&&abs(m.z)<1){
+		writeinfo(m.getString());
+		
+		if(abs(m.x)<470&&abs(m.z)<470){
 			cont_tag++;
-			accionEsquina();
+			differentialrobot_proxy->setSpeedBase(0,0);
+			sleep(2);
+			st=State::INIT;
 			writeinfo("Hemos llegado al tag "+ to_string(m.id));
 			writeinfo("x = "+to_string(m.x));
 			writeinfo("z = "+to_string(m.z));
@@ -225,7 +220,6 @@ void SpecificWorker::search()
 	}
 	else 
 	  st=State::INIT;
-	  
 }
 
 void SpecificWorker::moverse()

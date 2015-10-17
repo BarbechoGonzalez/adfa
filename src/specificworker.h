@@ -78,21 +78,25 @@ private:
 // 	void gototag();
 	struct Marca
 	      {	
-		
 		Marca(TBaseState State, int _id, float _z, float _x, float _y, float _rx, float _ry, float _rz)
 		{
 			id=_id;
-// 			int cx=State.x+sin(State.alpha)*180;
-// 			int cz=State.z+cos(State.alpha)*180;
-// 			
-// 			x=State.x+cos(State.alpha)*_x+sin(State.alpha)*_z;
-// 			z=State.z-sin(State.alpha)*_x+cos(State.alpha)*_z;
-			x=_x;
-			z=_z;
-			y=_y;
-			rx=_rx;
-			rz=_rz;
-			ry=_ry;
+			x = _x;
+			z = _z;
+			y = _y;
+			rx = _rx;
+			rz = _rz;
+			ry = _ry;
+		};
+		string getString(){
+			string aux="Redirigiendo al tag "+ to_string(id)+" esta en la posicion:"+"\n";
+			aux += "	  x = "+to_string(x)+"\n";
+			aux += "	  z = "+to_string(z)+"\n";
+			aux += "	  y = "+to_string(z)+"\n";
+			aux += "	  rx = "+to_string(rx)+"\n";
+			aux += "	  rz = "+to_string(rz)+"\n";
+			aux += "	  ry = "+to_string(ry)+"\n";
+			return aux;
 		};
 		int id;
 		float distance;
