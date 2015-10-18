@@ -28,7 +28,14 @@ void MyQTimer::setseg(int seg)
 void MyQTimer::run()
 {
 	while(1){
-	      msleep(mseg.get());
+	      msleep(mseg.get()/4);
+	      emit senal2();
+	      msleep(mseg.get()/4);
+	      emit senal2();	      
+	      msleep(mseg.get()/4);
+     	      emit senal2();
+	      msleep(mseg.get()/4);
+	      emit senal2();
 	      emit senal();
 	}
 }

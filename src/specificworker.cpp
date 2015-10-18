@@ -16,9 +16,6 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-// #define cota 16
-// #define distsecurity 440
-// #define threshold 400.0
 const int cota = 16;
 const int distsecurity = 440;
 const float threshold = 400;
@@ -26,6 +23,7 @@ const int velmax=350;	//velocidad maxima del robot
 const float velmaxg=2.2;
 
 #include "specificworker.h"
+#include <qt4/Qt/qlocale.h>
 static float sentido=M_PI;
 /**
 * \brief Default constructor
@@ -35,6 +33,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	connect(Start, SIGNAL(clicked()), this, SLOT(iniciar()));
 	connect(Stop, SIGNAL(clicked()), this, SLOT(parar()));
 	connect(&clk, SIGNAL(senal()), this, SLOT(reloj()));
+	connect(&clk, SIGNAL(senal2()), this ,SLOT(pintarRobot()));
 	clk.setseg(1000);
 	scene =  new QGraphicsScene();
 	Grafico->setScene(scene);
@@ -79,83 +78,45 @@ float SpecificWorker::getvelocidadg(float angle, int dismax, int dis)
 int SpecificWorker::getdistmin(int dismax,float angle)
 {
 	float aux=M_PI*angle*angle;
-	return 350+dismax*(pow(EulerC,-(aux)));
+	return 400+dismax*(pow(EulerC,-(aux)));
 }
-
 void SpecificWorker::compute()
-{
-//   TBaseState state;
-//   differentialrobot_proxy->getBaseState(state);
-//   qDebug()<<state.alpha<<state.x<<state.z;
-//   moverse();
-//   gototag();
-  
-	if(startbutton){
-		switch(st){
-		  case State::INIT:
-			moverse();
-			break;
-		  case State::SEARCH:
-			search();
-			break;
+{	
+	if(startbutton)
+	{
+		switch(st)
+		{
+			case State::INIT:
+			      moverse();
+			      break;
+			case State::SEARCH:
+			      search();
+			      break;
 		}
 	}
 }
 void SpecificWorker::getAprilTags()
 {
 }
-
-// void SpecificWorker::gototag()
-// {
-// 	static int cont_tag=0;
-// 	static int cont=0;
-// 	if(marcas.contains(cont_tag)){
-// 		cont++;
-// 		TBaseState state;
-// 		differentialrobot_proxy->getBaseState(state);
-// 		Marca m=marcas.get(cont_tag);
-// 		if(cont==100){
-// 			qDebug() << m.id;
-// 			writeinfo("Redirigiendo al tag "+ to_string(m.id)+" esta en la posicion:");
-// 			writeinfo("x = "+to_string(m.x));
-// 			writeinfo("z = "+to_string(m.z));
-// 			int aux_z=m.z-state.z;
-// 			int aux_x=m.x-state.x;
-// 			float beta=acos(aux_z/(sqrt(aux_x*aux_x+aux_z*aux_z)));
-// 			beta=beta-state.alpha;
-// 			differentialrobot_proxy->setSpeedBase(0,beta);
-// 			usleep(1000000);
-// 			cont=0;
-// 		}
-// 		
-// 		if(state.x-m.x<800 && abs(state.z-m.z)<800){
-// 			cont_tag++;
-// 			writeinfo("Hemos llegado al tag "+ to_string(m.id));
-// 			writeinfo("x = "+to_string(m.x));
-// 			writeinfo("z = "+to_string(m.z));
-// 		}
-// 	}
-// }
-
 bool SpecificWorker::esquina()
 {
 	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
 	return (ldata.data()+cota)->dist<distsecurity&&((ldata.data())+100-cota)->dist<distsecurity;
 }
-
 void SpecificWorker::accionEsquina()
-{
+{	
 	writeinfo("¡¡¡Esquina!!!");
+	marcas.clear();
 	differentialrobot_proxy->setSpeedBase(-400, 0); 				// DA MARCHA ATRAS
 	usleep(1000000);
 	RoboCompLaser::TLaserData ldata2 = laser_proxy->getLaserData();  //read laser data
 	if(ldata2.data()->dist>(ldata2.data()+99)->dist)
-	sentido=-sentido;
+		sentido=-sentido;
 	differentialrobot_proxy->setSpeedBase(0, (sentido));			//GIRA SOBRE SÍ MISMO
 	usleep(1000000);
 	giro=false;
+	st=State::INIT;
 }
-
 void SpecificWorker::accionNoEsquina()
 {	
 // 	static int cont;		//CONTROL DEL GIRO ALEATORIO
@@ -163,7 +124,7 @@ void SpecificWorker::accionNoEsquina()
 	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
 	std::sort( ldata.begin()+cota, ldata.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 	float distaux=(ldata.data()+cota)->dist;			//DISTANCIA MINIMA A LA PARED
-	float angle=(ldata.data()+cota)->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
+	float angle=(ldata.data()+100-cota)->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
 
 	int distmax=getdistmin(threshold,angle);			//CALCULA LA DISTANCIA A LA QUE DEBE DE GIRAR
 	int vel=getvelocidadl(distmax,distaux);			//CALCULA LA VELOCIDAD LINEAL
@@ -174,15 +135,13 @@ void SpecificWorker::accionNoEsquina()
 	if((ldata.data()+cota)->dist<distmax){
 		rot=getvelocidadg(angle,distmax,distaux);		//CALCULA EL ANGULO DE GIRO
 		differentialrobot_proxy->setSpeedBase(vel, rot);	//ESTABLECE LA VELOCIDAD Y LA ROTACION SI SE INCUMPLE LA DISTANCIA
+		marcas.clear();
+		st=State::INIT;
 	}
 /*===========================GIRA CUANDO ESTA EN UNA DISTANCIA DE SEGURIDAD===============================*/
-	else{
+	else
 		differentialrobot_proxy->setSpeedBase(vel, 0);
-/*=====================INFORMACION EN EL QTEXTEDIT====================*/
-// 				writeinfo("Velocidad lineal = "+to_string(vel));
-// 				writeinfo("Velocidad de rotacion = "+to_string(rot));
-/*====================================================================*/
-	}
+	
   
 }
 void SpecificWorker::pintarRobot()
@@ -192,7 +151,7 @@ void SpecificWorker::pintarRobot()
 	scene->addRect(state.x/10,-state.z/10,40,40,QPen(Qt::black),QBrush(Qt::black));
 }
 void SpecificWorker::search()
-{
+{	
 	static int cont_tag=0;
 	if(marcas.contains(cont_tag)){
 		Marca m=marcas.get(cont_tag);
@@ -203,23 +162,20 @@ void SpecificWorker::search()
 		float distaux=(ldata.data()+cota)->dist;
 		int distmax=0;
 		int vel=getvelocidadl(distmax,distaux);
-		float rot=m.ry/2;
+		float rot=atan2(m.x,m.z);
 		differentialrobot_proxy->setSpeedBase(vel,rot);
-		writeinfo(m.getString());
+		writeinfo("Redirigiendo al tag "+ to_string(m.id)+":\n	angulo de giro: "+to_string(rot)+" rad");
 		
-		if(abs(m.x)<470&&abs(m.z)<470){
+		if(abs(m.x)<830&&abs(m.z)<830){
 			cont_tag++;
+			writeinfo("Hemos llegado al tag "+ to_string(m.id));
 			differentialrobot_proxy->setSpeedBase(0,0);
 			sleep(2);
-			st=State::INIT;
-			writeinfo("Hemos llegado al tag "+ to_string(m.id));
-			writeinfo("x = "+to_string(m.x));
-			writeinfo("z = "+to_string(m.z));
-			st=State::INIT;
 		}
+		st=State::INIT;
 	}
 	else 
-	  st=State::INIT;
+		st=State::INIT;
 }
 
 void SpecificWorker::moverse()
@@ -237,9 +193,6 @@ void SpecificWorker::moverse()
 		{
 			accionNoEsquina();
 		}
-  /*=============DIBUJO PASO DEL ROBOT QTGRAFICSVIEW====================*/
-		pintarRobot();
-  /*====================================================================*/
 	}
 	catch(const Ice::Exception &ex)
 	{

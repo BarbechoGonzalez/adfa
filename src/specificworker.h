@@ -60,10 +60,11 @@ public slots:
 	void iniciar();
 	void parar();
 	void reloj();
+	void pintarRobot();
+
 
 private:
 	void search();
-	void pintarRobot();
 	void accionNoEsquina();
 	void accionEsquina();
 	bool esquina();
@@ -122,8 +123,13 @@ private:
 		QMutexLocker ml(&mutex);
 		Marca m=lista.find(id).value();
 		lista.remove(id);
+		lista.clear();
 		return m;
 	      };
+	      void clear(){
+		QMutexLocker ml(&mutex);
+		lista.clear();
+	      }
 	      bool contains(int id)
 	      {
 		QMutexLocker ml(&mutex);

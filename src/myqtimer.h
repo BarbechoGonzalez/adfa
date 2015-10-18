@@ -50,6 +50,7 @@ protected:
   virtual void run();
 signals:
   void senal();
+  void senal2();
 };
 
 #endif // MYQTIMER_H
