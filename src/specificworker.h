@@ -44,12 +44,6 @@ const double EulerC=std::exp(1.0);
 class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
-	bool giro;		//CONTROL DEL SENTIDO DE GIRO
-	float rot;		//VELOCIDAD DE GIRO rad/s
-	bool startbutton;	//BOTON DE STARTINICIADO
-	QGraphicsScene *scene;	//GRAFICOS DEL ROBOT
-	enum class State  { INIT, SEARCH} ;  
-	State st;
 
 public:
 	SpecificWorker(MapPrx& mprx);	
@@ -57,29 +51,45 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 public slots:
 	void compute();
+	void pintarRobot();
+	void reloj();
 	void iniciar();
 	void parar();
-	void reloj();
-	void pintarRobot();
-
-
 private:
-	void search();
-	void accionNoEsquina();
-	void accionEsquina();
-	bool esquina();
-	void moverse();
-	void getAprilTags();
+//=====================Variables==================
+	int id_tag;
+	float rot;		//VELOCIDAD DE GIRO rad/s
+	bool giro;		//CONTROL DEL SENTIDO DE GIRO
+	bool startbutton;	//BOTON DE STARTINICIADO
 	MyQTimer clk;
-	int getdistmin(int dismax, float angle);
+	QGraphicsScene *scene;	//GRAFICOS DEL ROBOT
+	enum class State  { INIT, SEARCH} ;  
+	State st;
+//=====================Funciones==================  
 	int getvelocidadl(float distmin, float dist);
 	float getvelocidadg(float angle, int dismax, int dis);
-	void writeinfo(string _info);
+	int getdistmin(int dismax, float angle);
+	void getAprilTags();
+	bool esquina();
+	void accionEsquina();
+	void accionNoEsquina();
+	void search();
+	void moverse();
 	void newAprilTag(const tagsList &tags);
-// 	void gototag();
+	void writeinfo(string _info);
+	void writeinfoTag(string _info);
+
 	struct Marca
 	      {	
-		Marca(TBaseState State, int _id, float _z, float _x, float _y, float _rx, float _ry, float _rz)
+		int id;
+		float distance;
+		float z;
+		float x;
+		float y;
+		float rx;
+		float ry;
+		float rz;
+		Marca(int _id, float _z, float _x, float _y, float _rx, float _ry, float _rz)
 		{
 			id=_id;
 			x = _x;
@@ -90,55 +100,44 @@ private:
 			ry = _ry;
 		};
 		string getString(){
-			string aux="Redirigiendo al tag "+ to_string(id)+" esta en la posicion:"+"\n";
-			aux += "	  x = "+to_string(x)+"\n";
-			aux += "	  z = "+to_string(z)+"\n";
-			aux += "	  y = "+to_string(z)+"\n";
-			aux += "	  rx = "+to_string(rx)+"\n";
-			aux += "	  rz = "+to_string(rz)+"\n";
-			aux += "	  ry = "+to_string(ry)+"\n";
+			string aux="id = "+to_string(id)+"\n";
+			aux += "x = "+to_string(x)+"\n";
+			aux += "z = "+to_string(z)+"\n";
+			aux += "y = "+to_string(z)+"\n";
+			aux += "rx = "+to_string(rx)+"\n";
+			aux += "rz = "+to_string(rz)+"\n";
+			aux += "ry = "+to_string(ry)+"\n";
 			return aux;
 		};
-		int id;
-		float distance;
-		float z;
-		float x;
-		float y;
-		float rx;
-		float ry;
-		float rz;
 	      };
 	struct listamarcas{
-	      
-	      QMap<int,Marca> lista;
-	      QMutex mutex;
-	      void add(const tag &t,TBaseState State)
-	      {
-		Marca m(State,t.id, t.tz, t.tx, t.ty, t.rx, t.ry, t.rz);
-		QMutexLocker ml(&mutex);
-		lista.insert(t.id,m);
-	      };
-	      Marca get(int id)
-	      {
-		QMutexLocker ml(&mutex);
-		Marca m=lista.find(id).value();
-		lista.remove(id);
-		lista.clear();
-		return m;
-	      };
-	      void clear(){
-		QMutexLocker ml(&mutex);
-		lista.clear();
-	      }
-	      bool contains(int id)
-	      {
-		QMutexLocker ml(&mutex);
-		return lista.contains(id);
-	      }
-	      
+		QMap<int,Marca> lista;
+		QMutex mutex;
+		void add(const tag &t)
+		{
+			Marca m(t.id, t.tz, t.tx, t.ty, t.rx, t.ry, t.rz);
+			QMutexLocker ml(&mutex);
+			lista.insert(t.id,m);
+		};
+		Marca get(int id)
+		{
+			QMutexLocker ml(&mutex);
+			Marca m=lista.find(id).value();
+			lista.remove(id);
+			lista.clear();
+			return m;
+		};
+		void clear(){
+			QMutexLocker ml(&mutex);
+			lista.clear();
+		}
+		bool contains(int id)
+		{
+			QMutexLocker ml(&mutex);
+			return lista.contains(id);
+		}      
 	};
 	listamarcas marcas;
 };
-
 #endif
 

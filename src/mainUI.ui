@@ -39,13 +39,13 @@
     <string>Stop Robot</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="InfoText">
+  <widget class="QTextEdit" name="InfoTag">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>80</y>
      <width>271</width>
-     <height>411</height>
+     <height>81</height>
     </rect>
    </property>
   </widget>
@@ -144,6 +144,16 @@
    </property>
    <property name="text">
     <string>SEGUNDOS</string>
+   </property>
+  </widget>
+  <widget class="QTextEdit" name="InfoText">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>271</width>
+     <height>321</height>
+    </rect>
    </property>
   </widget>
  </widget>

@@ -42,6 +42,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	rot=1.2;
 	clk.start();
 	st=State::INIT;
+	id_tag=0;
 }
 
 /**
@@ -78,7 +79,7 @@ float SpecificWorker::getvelocidadg(float angle, int dismax, int dis)
 int SpecificWorker::getdistmin(int dismax,float angle)
 {
 	float aux=M_PI*angle*angle;
-	return 400+dismax*(pow(EulerC,-(aux)));
+	return 300+dismax*(pow(EulerC,-(aux)));
 }
 void SpecificWorker::compute()
 {	
@@ -105,7 +106,7 @@ bool SpecificWorker::esquina()
 }
 void SpecificWorker::accionEsquina()
 {	
-	writeinfo("¡¡¡Esquina!!!");
+	writeinfo("Esquina");
 	marcas.clear();
 	differentialrobot_proxy->setSpeedBase(-400, 0); 				// DA MARCHA ATRAS
 	usleep(1000000);
@@ -120,19 +121,28 @@ void SpecificWorker::accionEsquina()
 void SpecificWorker::accionNoEsquina()
 {	
 // 	static int cont;		//CONTROL DEL GIRO ALEATORIO
-
+	float distaux = 0;
+	float angle = 0;
 	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
-	std::sort( ldata.begin()+cota, ldata.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
-	float distaux=(ldata.data()+cota)->dist;			//DISTANCIA MINIMA A LA PARED
-	float angle=(ldata.data()+100-cota)->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
-
+	if(marcas.contains(id_tag))
+	{
+		std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
+		distaux=(ldata.data())->dist;			//DISTANCIA MINIMA A LA PARED
+		angle=(ldata.data())->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
+	}
+	else
+	{
+		std::sort( ldata.begin()+cota, ldata.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
+		distaux=(ldata.data()+cota)->dist;			//DISTANCIA MINIMA A LA PARED
+		angle=(ldata.data()+cota)->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
+	}
 	int distmax=getdistmin(threshold,angle);			//CALCULA LA DISTANCIA A LA QUE DEBE DE GIRAR
 	int vel=getvelocidadl(distmax,distaux);			//CALCULA LA VELOCIDAD LINEAL
-
+	rot=getvelocidadg(angle,distmax,distaux);
 	if(rot<0)
 		giro=false;						//CONTROL DEL SENTIDO DE GIRO
 
-	if((ldata.data()+cota)->dist<distmax){
+	if(distaux<distmax){
 		rot=getvelocidadg(angle,distmax,distaux);		//CALCULA EL ANGULO DE GIRO
 		differentialrobot_proxy->setSpeedBase(vel, rot);	//ESTABLECE LA VELOCIDAD Y LA ROTACION SI SE INCUMPLE LA DISTANCIA
 		marcas.clear();
@@ -152,9 +162,10 @@ void SpecificWorker::pintarRobot()
 }
 void SpecificWorker::search()
 {	
-	static int cont_tag=0;
-	if(marcas.contains(cont_tag)){
-		Marca m=marcas.get(cont_tag);
+	static int min;
+	static bool encontrado=false;
+	if(marcas.contains(id_tag)){
+		Marca m=marcas.get(id_tag);
 		TBaseState state;
 		differentialrobot_proxy->getBaseState(state);
 		RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
@@ -164,20 +175,28 @@ void SpecificWorker::search()
 		int vel=getvelocidadl(distmax,distaux);
 		float rot=atan2(m.x,m.z);
 		differentialrobot_proxy->setSpeedBase(vel,rot);
-		writeinfo("Redirigiendo al tag "+ to_string(m.id)+":\n	angulo de giro: "+to_string(rot)+" rad");
-		
-		if(abs(m.x)<830&&abs(m.z)<830){
-			cont_tag++;
-			writeinfo("Hemos llegado al tag "+ to_string(m.id));
+		float distance=(sqrt(m.x*m.x+m.z*m.z));
+		writeinfoTag("Redirigiendo al tag "+ to_string(m.id)+":\n  Giro: "+to_string(rot)+" rad\n  Distancia: "+to_string(distance)+ "mm");
+		encontrado=false;
+		if(abs(m.x)<750&&abs(m.z)<750){
+			min=LCDmin->intValue();
+			id_tag++;
 			differentialrobot_proxy->setSpeedBase(0,0);
+			writeinfo("Hemos llegado al tag "+ to_string(m.id)+"\n  Distancia: "+to_string(distance)+ "mm\n"
+			+"  Time: "+to_string(LCDhor->intValue())+":"+to_string(LCDmin->intValue())+":"+to_string(LCDseg->intValue()));
 			sleep(2);
+			encontrado=true;
 		}
-		st=State::INIT;
 	}
-	else 
-		st=State::INIT;
+	else
+		writeinfoTag("No se ve el tag: "+ to_string(id_tag));
+	if(LCDmin->intValue()==min+5&&encontrado){
+		id_tag=0;
+		writeinfo("Comenzamos de nuevo por exceso de tiempo");
+		encontrado=false;
+	}
+	st=State::INIT;
 }
-
 void SpecificWorker::moverse()
 {
 	try
@@ -200,17 +219,13 @@ void SpecificWorker::moverse()
 	}
   
 }
-
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {
   for (auto t :tags){
-	TBaseState State;
-	differentialrobot_proxy->getBaseState(State);
-	marcas.add(t,State);
+	marcas.add(t);
   }
 	st=State::SEARCH;
 }
-
 void SpecificWorker::reloj()
 {
 	static int seg=1;
@@ -243,9 +258,14 @@ void SpecificWorker::parar()
 	startbutton=false;
 	differentialrobot_proxy->setSpeedBase(0, 0);
 }
+void SpecificWorker::writeinfoTag(string _info)
+{	
+	InfoTag->clear();
+	QString *text=new QString(_info.c_str());
+	InfoTag->append(*text);
+}
 void SpecificWorker::writeinfo(string _info)
-{
+{	
 	QString *text=new QString(_info.c_str());
 	InfoText->append(*text);
-}
-  
+}  
