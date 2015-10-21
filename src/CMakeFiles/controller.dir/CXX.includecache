@@ -19,6 +19,8 @@ specificworker.h
 /home/ivan/robocomp/components/g1/controller/src/specificworker.h
 qt4/Qt/qlocale.h
 -
+qt4/Qt/qvarlengtharray.h
+-
 
 /home/ivan/robocomp/components/g1/controller/src/specificworker.h
 genericworker.h
@@ -1751,6 +1753,10 @@ qprinter.h
 /usr/include/qt4/QtGui/QPushButton
 qpushbutton.h
 /usr/include/qt4/QtGui/qpushbutton.h
+
+/usr/include/qt4/QtGui/QSlider
+qslider.h
+/usr/include/qt4/QtGui/qslider.h
 
 /usr/include/qt4/QtGui/QTextEdit
 qtextedit.h
@@ -4200,6 +4206,8 @@ QtGui/QLCDNumber
 QtGui/QLabel
 -
 QtGui/QPushButton
+-
+QtGui/QSlider
 -
 QtGui/QTextEdit
 -

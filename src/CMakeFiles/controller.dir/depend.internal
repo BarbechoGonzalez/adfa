@@ -211,6 +211,7 @@ src/CMakeFiles/controller.dir/apriltagsI.cpp.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -653,6 +654,7 @@ src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -1095,6 +1097,7 @@ src/CMakeFiles/controller.dir/genericmonitor.cpp.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -1535,6 +1538,7 @@ src/CMakeFiles/controller.dir/genericworker.cpp.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -2345,6 +2349,7 @@ src/CMakeFiles/controller.dir/main.cpp.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -2787,6 +2792,7 @@ src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -3229,6 +3235,7 @@ src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -3671,6 +3678,7 @@ src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -4111,6 +4119,7 @@ src/CMakeFiles/controller.dir/moc_genericworker.cxx.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -4556,6 +4565,7 @@ src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -5010,6 +5020,7 @@ src/CMakeFiles/controller.dir/moc_specificworker.cxx.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -5458,6 +5469,7 @@ src/CMakeFiles/controller.dir/specificmonitor.cpp.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
@@ -5912,6 +5924,7 @@ src/CMakeFiles/controller.dir/specificworker.cpp.o
  /usr/include/qt4/QtGui/QPlatformWindow
  /usr/include/qt4/QtGui/QPrinter
  /usr/include/qt4/QtGui/QPushButton
+ /usr/include/qt4/QtGui/QSlider
  /usr/include/qt4/QtGui/QTextEdit
  /usr/include/qt4/QtGui/QTransform
  /usr/include/qt4/QtGui/QVector3D
