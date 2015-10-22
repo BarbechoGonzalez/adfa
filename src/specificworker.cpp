@@ -70,7 +70,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	timer.start(Period);
 	return true;
 }
-
 int SpecificWorker::getvelocidadl(float distmin, float dist)
 {
   	if(dist<distmin){
@@ -98,6 +97,11 @@ int SpecificWorker::getdistmin(int dismax,float angle)
 }
 void SpecificWorker::compute()
 {	
+	ldata = laser_proxy->getLaserData();
+	ldatacota = laser_proxy->getLaserData();
+	std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
+	std::sort( ldatacota.begin()+cota, ldatacota.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
+	differentialrobot_proxy->getBaseState(state);
 	if(startbutton)
 	{
 		switch(st)
@@ -116,8 +120,8 @@ void SpecificWorker::getAprilTags()
 }
 bool SpecificWorker::esquina()
 {
-	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
-	return (ldata.data()+cota)->dist<distsecurity&&((ldata.data())+100-cota)->dist<distsecurity;
+	RoboCompLaser::TLaserData ldataaux = laser_proxy->getLaserData();
+	return (ldataaux.data()+cota)->dist<distsecurity&&((ldataaux.data())+100-cota)->dist<distsecurity;
 }
 void SpecificWorker::accionEsquina()
 {	
@@ -125,8 +129,8 @@ void SpecificWorker::accionEsquina()
 // 	marcas.clear();
 	differentialrobot_proxy->setSpeedBase(-400, 0); 				// DA MARCHA ATRAS
 	usleep(1000000);
-	RoboCompLaser::TLaserData ldata2 = laser_proxy->getLaserData();  //read laser data
-	if(ldata2.data()->dist>(ldata2.data()+99)->dist)
+	RoboCompLaser::TLaserData ldataaux = laser_proxy->getLaserData();  //read laser data
+	if(ldataaux.data()->dist<(ldataaux.data()+99)->dist)
 		sentido=-sentido;
 	differentialrobot_proxy->setSpeedBase(0, (sentido));			//GIRA SOBRE SÍ MISMO
 	usleep(1000000);
@@ -137,25 +141,21 @@ void SpecificWorker::accionNoEsquina()
 // 	static int cont;		//CONTROL DEL GIRO ALEATORIO
 	float distaux = 0;
 	float angle = 0;
-	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
 	if(marcas.contains(id_tag))
 	{
-		std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 		distaux=(ldata.data())->dist;			//DISTANCIA MINIMA A LA PARED
 		angle=(ldata.data())->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
 	}
 	else
 	{
-		std::sort( ldata.begin()+cota, ldata.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
-		distaux=(ldata.data()+cota)->dist;			//DISTANCIA MINIMA A LA PARED
-		angle=(ldata.data()+cota)->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
+		distaux=(ldatacota.data()+cota)->dist;			//DISTANCIA MINIMA A LA PARED
+		angle=(ldatacota.data()+cota)->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
 	}
 	int distmax=getdistmin(threshold,angle);			//CALCULA LA DISTANCIA A LA QUE DEBE DE GIRAR
 	int vel=getvelocidadl(distmax,distaux);			//CALCULA LA VELOCIDAD LINEAL
 	rot=getvelocidadg(angle,distmax,distaux);
 	if(rot<0)
 		giro=false;						//CONTROL DEL SENTIDO DE GIRO
-
 	if(distaux<distmax){
 		rot=getvelocidadg(angle,distmax,distaux);		//CALCULA EL ANGULO DE GIRO
 		differentialrobot_proxy->setSpeedBase(vel, rot);	//ESTABLECE LA VELOCIDAD Y LA ROTACION SI SE INCUMPLE LA DISTANCIA
@@ -163,24 +163,21 @@ void SpecificWorker::accionNoEsquina()
 // 		st=State::INIT;
 	}
 /*===========================GIRA CUANDO ESTA EN UNA DISTANCIA DE SEGURIDAD===============================*/
-	else{
+	else
 		differentialrobot_proxy->setSpeedBase(vel, 0);
-	}
   
 }
 void SpecificWorker::pintarRobot()
-{
-	TBaseState state;
-	differentialrobot_proxy->getBaseState(state);	
+{	
 	scene->addRect(state.x/10,-state.z/10,40,40,QPen(Qt::black),QBrush(Qt::black));
 }
 QVec cambiarinversoPlano(float alpha, QVec punto, QVec plano)
 {
 	QMat Rt(3,3);
 	Rt(0,0)=cos(alpha);
-	Rt(0,1)=sin(alpha);
+	Rt(0,1)=-sin(alpha);
 	Rt(0,2)=plano(0);
-	Rt(1,0)=-sin(alpha);
+	Rt(1,0)=sin(alpha);
 	Rt(1,1)=cos(alpha);
 	Rt(1,2)=plano(1);
 	Rt(2,0)=0;
@@ -197,7 +194,6 @@ QVec cambiarinversoPlano(float alpha, QVec punto, QVec plano)
 	TagR=TagR/TagR(2);
 	return TagR;
 }
-
 void SpecificWorker::search()
 {	
 	static int min;
@@ -205,39 +201,39 @@ void SpecificWorker::search()
 	if(marcas.contains(id_tag)){
 		Marca m=marcas.get(id_tag);
 		float rot=0;
-		RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
-		std::sort( ldata.begin()+cota, ldata.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
-		float distaux=(ldata.data()+cota)->dist;
+		float distaux=(ldatacota.data()+cota)->dist;
 		int distmax=0;
-		int vel=getvelocidadl(distmax,distaux);
-	
-		TBaseState state;
-		differentialrobot_proxy->getBaseState(state);	
-		
+		int vel=getvelocidadl(distmax,distaux);		
 		QVec plano(2);
 		plano(0)=state.z;
 		plano(1)=state.x;
 		QVec punto(2);
 		punto(0)=m.z;
 		punto(1)=m.x;
-		QVec tag=cambiarinversoPlano(state.alpha,punto,plano);
+		QVec tagR=cambiarinversoPlano(state.alpha,punto,plano);
+// 		QVec plano2(2);
+// 		plano(0)=180;
+// 		plano(1)=0;
+// 		QVec tagC=cambiarinversoPlano(state.alpha,tagR,plano2);
 		if(espaciolibre()){	
-			rot=atan2(tag(1),tag(0));
+			rot=atan2(tagR(1),tagR(0))*2;
 			differentialrobot_proxy->setSpeedBase(vel,rot);
 		}
 		
 		
-		float distance=(sqrt(m.x*m.x+m.z*m.z));
+		float distance=(sqrt((state.x-m.x)*(state.x-m.x)+(state.z-m.z)*(state.z-m.z)));
 		writeinfoTag("Redirigiendo al tag "+ to_string(m.id)+":\n  Giro: "+to_string(rot)+" rad\n  Distancia: "+to_string(distance)+ "mm");
 		encontrado=false;
-		if(abs(tag(1))<750&&abs(tag(0))<750){
+		if(distance<750){
 			min=LCDmin->intValue();
 			id_tag++;
 			differentialrobot_proxy->setSpeedBase(0,0);
 			writeinfo("Hemos llegado al tag "+ to_string(m.id)+"\n  Distancia: "+to_string(distance)+ "mm\n"
 			+"  Time: "+to_string(LCDhor->intValue())+":"+to_string(LCDmin->intValue())+":"+to_string(LCDseg->intValue()));
+			writeinfo(m.getString());
 			sleep(2);
 			encontrado=true;
+			marcas.clear();
 		}
 	}
 	else
@@ -264,7 +260,7 @@ void SpecificWorker::moverse()
 		{
 			accionNoEsquina();
 		}
-		if(marcas.contains(id_tag)/*&&espaciolibre()*/){
+		if(espaciolibre()){
 			st=State::SEARCH;
 		}
 		else
@@ -278,15 +274,11 @@ void SpecificWorker::moverse()
 }
 bool SpecificWorker::espaciolibre()
 {
-	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data
-	std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 	return(ldata.data()->dist>200);
 }
 
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {	
-	TBaseState state;
-	differentialrobot_proxy->getBaseState(state);
 	for (auto t :tags){
 	      marcas.add(t,state);
 	}

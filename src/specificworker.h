@@ -76,6 +76,9 @@ private:
 	float threshold;
 	int velmax;	//velocidad maxima del robot
 	float velmaxg;
+	TBaseState state;
+	RoboCompLaser::TLaserData ldata;
+	RoboCompLaser::TLaserData ldatacota;
 //=====================Funciones==================  
 	int getvelocidadl(float distmin, float dist);
 	float getvelocidadg(float angle, int dismax, int dis);
@@ -105,9 +108,9 @@ private:
 		{
 			QMat Rt(3,3);
 			Rt(0,0)=cos(alpha);
-			Rt(0,1)=sin(alpha);
+			Rt(0,1)=-sin(alpha);
 			Rt(0,2)=plano(0);
-			Rt(1,0)=-sin(alpha);
+			Rt(1,0)=sin(alpha);
 			Rt(1,1)=cos(alpha);
 			Rt(1,2)=plano(1);
 			Rt(2,0)=0;
@@ -134,7 +137,7 @@ private:
 			PlanoR(0)=state.z;
 			PlanoR(1)=state.x;
 			QVec TagR = cambiarPlano(state.alpha,TagC,PlanoC);
-			QVec TagM = cambiarPlano(state.alpha,TagR,PlanoR);
+			QVec TagM = cambiarPlano(state.alpha,TagC,PlanoR);
 			id=_id;
 			x = TagM(1);
 			z = TagM(0);
@@ -161,8 +164,7 @@ private:
 		{
 			Marca m(state, t.id, t.tz, t.tx, t.ty, t.rx, t.ry, t.rz);
 			QMutexLocker ml(&mutex);
-// 			if(!lista.contains(t.id))
-				lista.insert(t.id,m);
+			lista.insert(t.id,m);
 		};
 		Marca get(int id)
 		{
@@ -172,10 +174,10 @@ private:
 // 			lista.clear();
 			return m;
 		};
-// 		void clear(){
-// 			QMutexLocker ml(&mutex);
-// 			lista.clear();
-// 		}
+		void clear(){
+			QMutexLocker ml(&mutex);
+			lista.clear();
+		}
 		bool contains(int id)
 		{
 			QMutexLocker ml(&mutex);
