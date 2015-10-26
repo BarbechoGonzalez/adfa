@@ -1,1 +1,0 @@
-/home/ivan/robocomp/components/g1/controller/src/CMakeFiles/controller.dir
