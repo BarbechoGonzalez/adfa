@@ -130,13 +130,13 @@ private:
 			QVec TagC(2);
 			TagC(0)=_z;
 			TagC(1)=_x;
-			QVec PlanoC(2);
-			PlanoC(0)=180;
-			PlanoC(1)=0;
+// 			QVec PlanoC(2);
+// 			PlanoC(0)=180;
+// 			PlanoC(1)=0;
 			QVec PlanoR(2);
 			PlanoR(0)=state.z;
 			PlanoR(1)=state.x;
-			QVec TagR = cambiarPlano(state.alpha,TagC,PlanoC);
+// 			QVec TagR = cambiarPlano(state.alpha,TagC,PlanoC);
 			QVec TagM = cambiarPlano(state.alpha,TagC,PlanoR);
 			id=_id;
 			x = TagM(1);

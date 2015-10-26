@@ -9,9 +9,9 @@
 -I/classes
 -I/home/ivan/robocomp/components/g1/controller
 -I/home/ivan/robocomp/components/g1/controller/src/.
--I/home/ivan/robocomp/classes
--I/home/ivan/robocomp/libs
--I/home/ivan/robocomp/interfaces
+-I/opt/robocomp//classes
+-I/opt/robocomp//libs
+-I/opt/robocomp//interfaces
 -I/home/ivan/robocomp/components/g1/controller
 -I/include
 -I/usr/include/qt4

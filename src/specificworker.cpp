@@ -51,8 +51,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	cota = 16;
 	distsecurity = 440;
 	threshold = 400;
-	velmax=350;	//velocidad maxima del robot
-	velmaxg=2.2;
+	velmax=270;	//velocidad maxima del robot
+	velmaxg=1.5;
 	slidercota(cota);
 	sliderdisG(threshold);
 	sliderdisS(distsecurity);
@@ -138,7 +138,6 @@ void SpecificWorker::accionEsquina()
 }
 void SpecificWorker::accionNoEsquina()
 {	
-// 	static int cont;		//CONTROL DEL GIRO ALEATORIO
 	float distaux = 0;
 	float angle = 0;
 	if(marcas.contains(id_tag))
