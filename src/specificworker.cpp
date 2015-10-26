@@ -216,7 +216,7 @@ void SpecificWorker::search()
 // 		plano(1)=0;
 // 		QVec tagC=cambiarinversoPlano(state.alpha,tagR,plano2);
 		if(espaciolibre()){	
-			rot=atan2(tagR(1),tagR(0))*4;
+			rot=atan2(tagR(1),tagR(0))*2;
 			differentialrobot_proxy->setSpeedBase(vel,rot);
 		}
 		
