@@ -6,6 +6,14 @@
 
 #IncludeRegexTransform: 
 
+/home/ivan/robocomp/classes/qlog/qlog.h
+QtCore
+-
+iostream
+-
+Logger.h
+-
+
 /home/ivan/robocomp/components/g1/controller/src/specificworker.cpp
 specificworker.h
 /home/ivan/robocomp/components/g1/controller/src/specificworker.h
@@ -29,13 +37,7 @@ qt4/QtGui/qplaintextedit.h
 -
 qt4/Qt/qdebug.h
 -
-
-/opt/robocomp/classes/qlog/qlog.h
-QtCore
--
-iostream
--
-Logger.h
+listamarcas.h
 -
 
 /opt/robocomp/include/innermodel/innermodel.h
@@ -4086,6 +4088,38 @@ Ice/StreamF.h
 Ice/UndefSysMacros.h
 -
 
+src/Controller.h
+Ice/ProxyF.h
+-
+Ice/ObjectF.h
+-
+Ice/Exception.h
+-
+Ice/LocalObject.h
+-
+Ice/StreamHelpers.h
+-
+Ice/Proxy.h
+-
+Ice/Object.h
+-
+Ice/Outgoing.h
+-
+Ice/OutgoingAsync.h
+-
+Ice/Incoming.h
+-
+Ice/Direct.h
+-
+IceUtil/ScopedArray.h
+-
+IceUtil/Optional.h
+-
+Ice/StreamF.h
+-
+Ice/UndefSysMacros.h
+-
+
 src/DifferentialRobot.h
 Ice/ProxyF.h
 -
@@ -4173,9 +4207,25 @@ CommonBehavior.h
 -
 Laser.h
 -
+Controller.h
+-
 DifferentialRobot.h
 -
 AprilTags.h
+-
+
+src/listamarcas.h
+marca.h
+src/marca.h
+qt4/QtCore/QMutex
+-
+AprilTags.h
+-
+DifferentialRobot.h
+-
+
+src/marca.h
+qmat/QMatAll
 -
 
 src/myqtimer.h

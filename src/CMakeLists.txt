@@ -28,8 +28,9 @@ SET ( SOURCES
   specificworker.cpp
   apriltagsI.cpp
   myqtimer.cpp
+  marca.cpp
+  listamarcas.cpp
 )
-
 # Headers set
 SET ( HEADERS
   ${HEADERS}
@@ -40,10 +41,12 @@ SET ( HEADERS
   specificworker.h
   apriltagsI.h
   myqtimer.h
+  marca.h
+  listamarcas.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior DifferentialRobot Laser DifferentialRobot AprilTags )
+ROBOCOMP_WRAP_ICE( CommonBehavior DifferentialRobot Laser DifferentialRobot AprilTags Controller )
 SET (EXECUTABLE_OUTPUT_PATH ${RC_COMPONENT_DEVEL_PATH}/bin)
 
 # Qt4

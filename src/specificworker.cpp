@@ -70,6 +70,152 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	timer.start(Period);
 	return true;
 }
+void SpecificWorker::compute()
+{	
+	RoboCompController::TargetPose t; 
+	controller_proxy->go(t);
+	ldata = laser_proxy->getLaserData();
+	ldatacota = laser_proxy->getLaserData();
+	std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
+	std::sort( ldatacota.begin()+cota, ldatacota.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
+	differentialrobot_proxy->getBaseState(state);
+	
+	switch(st)
+	{
+		case State::INIT:
+		      
+		      break;
+		case State::BUSCAR:
+		      moverse();
+		  break;
+		case State::ORIENTARSE:
+		      search();
+		      break;
+	}
+}
+void SpecificWorker::moverse()
+{
+	try
+	{
+  /*=================================DETECTA LAS ESQUINAS===================================*/
+		if(esquina())
+		{
+			accionEsquina();
+		}
+  /*========================================================================================*/
+  /*==================================SI NO ES UNA ESQUINA==================================*/
+		else
+		{
+			accionNoEsquina();
+		}
+// 		if(espaciolibre()){
+// 			st=State::ORIENTARSE;
+// 		}
+// 		else
+// 			st=State::BUSCAR;
+	}
+	catch(const Ice::Exception &ex)
+	{
+		writeinfo("ex");
+	}
+  
+}
+QVec cambiarinversoPlano(float alpha, QVec punto, QVec plano)
+{
+	QMat Rt(3,3);
+	Rt(0,0)=cos(alpha);
+	Rt(0,1)=-sin(alpha);
+	Rt(0,2)=plano(0);
+	Rt(1,0)=sin(alpha);
+	Rt(1,1)=cos(alpha);
+	Rt(1,2)=plano(1);
+	Rt(2,0)=0;
+	Rt(2,1)=0;
+	Rt(2,2)=1;
+	QVec m(3);
+	m(0)=punto(0);
+	m(1)=punto(1);
+	m(2)=1;
+	QMat Rtinver=Rt.invert();
+	
+	QVec TagR(3);
+	TagR=Rtinver*m;
+	TagR=TagR/TagR(2);
+	return TagR;
+}
+void SpecificWorker::search()
+{	
+	try{
+		NavState s=controller_proxy->getState();
+		if(s.state=="FINISH"){
+			st=State::BUSCAR;
+			sleep(1);
+			id_tag++;
+			return;
+		}
+		if(s.state=="IDLE"||s.state=="FINISH"||s.state=="WORKING"){
+			if (marcas.contains(id_tag)){
+				Marca m=marcas.get(id_tag);
+				RoboCompController::TargetPose t = {m.x,m.y,m.z};
+				controller_proxy->go(t);
+			}
+
+		}
+	}
+	catch(const Ice::Exception &ex)
+	{
+		qDebug()<<"ex";
+	}
+/*	
+// 	static int min;
+// 	static bool encontrado=false;
+// 	if(marcas.contains(id_tag)){
+// 		Marca m=marcas.get(id_tag);
+// 		float rot=0;
+// 		float distaux=(ldatacota.data()+cota)->dist;
+// 		int distmax=0;
+// 		int vel=getvelocidadl(distmax,distaux);		
+// 		QVec plano(2);
+// 		plano(0)=state.z;
+// 		plano(1)=state.x;
+// 		QVec punto(2);
+// 		punto(0)=m.z;
+// 		punto(1)=m.x;
+// 		QVec tagR=cambiarinversoPlano(state.alpha,punto,plano);
+// // 		QVec plano2(2);
+// // 		plano(0)=180;
+// // 		plano(1)=0;
+// // 		QVec tagC=cambiarinversoPlano(state.alpha,tagR,plano2);
+// 		if(espaciolibre()){	
+// 			rot=atan2(tagR(1),tagR(0))*2;
+// 			differentialrobot_proxy->setSpeedBase(vel,rot);
+// 		}
+// 		
+// 		
+// 		float distance=(sqrt((state.x-m.x)*(state.x-m.x)+(state.z-m.z)*(state.z-m.z)));
+// 		writeinfoTag("Redirigiendo al tag "+ to_string(m.id)+":\n  Giro: "+to_string(rot)+" rad\n  Distancia: "+to_string(distance)+ "mm");
+// 		encontrado=false;
+// 		if(distance<750){
+// 			min=LCDmin->intValue();
+// 			id_tag++;
+// 			differentialrobot_proxy->setSpeedBase(0,0);
+// 			writeinfo("Hemos llegado al tag "+ to_string(m.id)+"\n  Distancia: "+to_string(distance)+ "mm\n"
+// 			+"  Time: "+to_string(LCDhor->intValue())+":"+to_string(LCDmin->intValue())+":"+to_string(LCDseg->intValue()));
+// 			writeinfo(m.getString());
+// 			sleep(2);
+// 			encontrado=true;
+// 			marcas.clear();
+// 		}
+// 	}
+// 	else
+// 		writeinfoTag("No se ve el tag: "+ to_string(id_tag));
+// 	if(LCDmin->intValue()==min+5&&encontrado){
+// 		id_tag=0;
+// 		writeinfo("Comenzamos de nuevo por exceso de tiempo");
+// 		encontrado=false;
+// 	}
+// 	st=State::BUSCAR;*/
+}
 int SpecificWorker::getvelocidadl(float distmin, float dist)
 {
   	if(dist<distmin){
@@ -94,26 +240,6 @@ int SpecificWorker::getdistmin(int dismax,float angle)
 {
 	float aux=M_PI*angle*angle;
 	return 300+dismax*(pow(EulerC,-(aux)));
-}
-void SpecificWorker::compute()
-{	
-	ldata = laser_proxy->getLaserData();
-	ldatacota = laser_proxy->getLaserData();
-	std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
-	std::sort( ldatacota.begin()+cota, ldatacota.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
-	differentialrobot_proxy->getBaseState(state);
-	if(startbutton)
-	{
-		switch(st)
-		{
-			case State::INIT:
-			      moverse();
-			      break;
-			case State::SEARCH:
-			      search();
-			      break;
-		}
-	}
 }
 void SpecificWorker::getAprilTags()
 {
@@ -159,7 +285,7 @@ void SpecificWorker::accionNoEsquina()
 		rot=getvelocidadg(angle,distmax,distaux);		//CALCULA EL ANGULO DE GIRO
 		differentialrobot_proxy->setSpeedBase(vel, rot);	//ESTABLECE LA VELOCIDAD Y LA ROTACION SI SE INCUMPLE LA DISTANCIA
 // 		marcas.clear();
-// 		st=State::INIT;
+// 		st=State::BUSCAR;
 	}
 /*===========================GIRA CUANDO ESTA EN UNA DISTANCIA DE SEGURIDAD===============================*/
 	else
@@ -170,107 +296,8 @@ void SpecificWorker::pintarRobot()
 {	
 	scene->addRect(state.x/10,-state.z/10,40,40,QPen(Qt::black),QBrush(Qt::black));
 }
-QVec cambiarinversoPlano(float alpha, QVec punto, QVec plano)
-{
-	QMat Rt(3,3);
-	Rt(0,0)=cos(alpha);
-	Rt(0,1)=-sin(alpha);
-	Rt(0,2)=plano(0);
-	Rt(1,0)=sin(alpha);
-	Rt(1,1)=cos(alpha);
-	Rt(1,2)=plano(1);
-	Rt(2,0)=0;
-	Rt(2,1)=0;
-	Rt(2,2)=1;
-	QVec m(3);
-	m(0)=punto(0);
-	m(1)=punto(1);
-	m(2)=1;
-	QMat Rtinver=Rt.invert();
-	
-	QVec TagR(3);
-	TagR=Rtinver*m;
-	TagR=TagR/TagR(2);
-	return TagR;
-}
-void SpecificWorker::search()
-{	
-	static int min;
-	static bool encontrado=false;
-	if(marcas.contains(id_tag)){
-		Marca m=marcas.get(id_tag);
-		float rot=0;
-		float distaux=(ldatacota.data()+cota)->dist;
-		int distmax=0;
-		int vel=getvelocidadl(distmax,distaux);		
-		QVec plano(2);
-		plano(0)=state.z;
-		plano(1)=state.x;
-		QVec punto(2);
-		punto(0)=m.z;
-		punto(1)=m.x;
-		QVec tagR=cambiarinversoPlano(state.alpha,punto,plano);
-// 		QVec plano2(2);
-// 		plano(0)=180;
-// 		plano(1)=0;
-// 		QVec tagC=cambiarinversoPlano(state.alpha,tagR,plano2);
-		if(espaciolibre()){	
-			rot=atan2(tagR(1),tagR(0))*2;
-			differentialrobot_proxy->setSpeedBase(vel,rot);
-		}
-		
-		
-		float distance=(sqrt((state.x-m.x)*(state.x-m.x)+(state.z-m.z)*(state.z-m.z)));
-		writeinfoTag("Redirigiendo al tag "+ to_string(m.id)+":\n  Giro: "+to_string(rot)+" rad\n  Distancia: "+to_string(distance)+ "mm");
-		encontrado=false;
-		if(distance<750){
-			min=LCDmin->intValue();
-			id_tag++;
-			differentialrobot_proxy->setSpeedBase(0,0);
-			writeinfo("Hemos llegado al tag "+ to_string(m.id)+"\n  Distancia: "+to_string(distance)+ "mm\n"
-			+"  Time: "+to_string(LCDhor->intValue())+":"+to_string(LCDmin->intValue())+":"+to_string(LCDseg->intValue()));
-			writeinfo(m.getString());
-			sleep(2);
-			encontrado=true;
-			marcas.clear();
-		}
-	}
-	else
-		writeinfoTag("No se ve el tag: "+ to_string(id_tag));
-	if(LCDmin->intValue()==min+5&&encontrado){
-		id_tag=0;
-		writeinfo("Comenzamos de nuevo por exceso de tiempo");
-		encontrado=false;
-	}
-	st=State::INIT;
-}
-void SpecificWorker::moverse()
-{
-	try
-	{
-  /*=================================DETECTA LAS ESQUINAS===================================*/
-		if(esquina())
-		{
-			accionEsquina();
-		}
-  /*========================================================================================*/
-  /*==================================SI NO ES UNA ESQUINA==================================*/
-		else
-		{
-			accionNoEsquina();
-		}
-		if(espaciolibre()){
-			st=State::SEARCH;
-		}
-		else
-			st=State::INIT;
-	}
-	catch(const Ice::Exception &ex)
-	{
-		writeinfo("ex");
-	}
-  
-}
+
+
 bool SpecificWorker::espaciolibre()
 {
 	return(ldata.data()->dist>200);
@@ -281,11 +308,11 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
 	for (auto t :tags){
 	      marcas.add(t,state);
 	}
-	if(espaciolibre()){
-		st=State::SEARCH;
-	}
-	else
-		st=State::INIT;
+// 	if(espaciolibre()){
+		st=State::ORIENTARSE;
+// 	}
+// 	else
+// 		st=State::BUSCAR;
 }
 void SpecificWorker::reloj()
 {
@@ -312,11 +339,11 @@ void SpecificWorker::reloj()
 }
 void SpecificWorker::iniciar()
 {
-	startbutton=true;
+	st=State::BUSCAR;
 }
 void SpecificWorker::parar()
 {
-	startbutton=false;
+	st=State::INIT;
 	differentialrobot_proxy->setSpeedBase(0, 0);
 }
 void SpecificWorker::reset()

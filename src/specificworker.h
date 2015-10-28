@@ -38,6 +38,7 @@
 #include <qt4/QtCore/qmutex.h>
 #include <qt4/QtGui/qplaintextedit.h>
 #include <qt4/Qt/qdebug.h>
+#include <listamarcas.h>
 
 
 const double EulerC=std::exp(1.0);
@@ -69,7 +70,7 @@ private:
 	bool startbutton;	//BOTON DE STARTINICIADO
 	MyQTimer clk;
 	QGraphicsScene *scene;	//GRAFICOS DEL ROBOT
-	enum class State  { INIT, SEARCH} ;  
+	enum class State  { INIT, BUSCAR, ORIENTARSE} ;  
 	State st;
 	int cota;
 	int distsecurity;
@@ -79,7 +80,9 @@ private:
 	TBaseState state;
 	RoboCompLaser::TLaserData ldata;
 	RoboCompLaser::TLaserData ldatacota;
-//=====================Funciones==================  
+	listaMarcas marcas;
+
+	//=====================Funciones==================  
 	int getvelocidadl(float distmin, float dist);
 	float getvelocidadg(float angle, int dismax, int dis);
 	int getdistmin(int dismax, float angle);
@@ -93,98 +96,6 @@ private:
 	void newAprilTag(const tagsList &tags);
 	void writeinfo(string _info);
 	void writeinfoTag(string _info);
-
-	struct Marca
-	      {	
-		int id;
-		float distance;
-		float z;
-		float x;
-		float y;
-		float rx;
-		float ry;
-		float rz;
-		QVec cambiarPlano(float alpha, QVec punto, QVec plano)
-		{
-			QMat Rt(3,3);
-			Rt(0,0)=cos(alpha);
-			Rt(0,1)=-sin(alpha);
-			Rt(0,2)=plano(0);
-			Rt(1,0)=sin(alpha);
-			Rt(1,1)=cos(alpha);
-			Rt(1,2)=plano(1);
-			Rt(2,0)=0;
-			Rt(2,1)=0;
-			Rt(2,2)=1;
-			QVec m(3);
-			m(0)=punto(0);
-			m(1)=punto(1);
-			m(2)=1;
-			QVec sol(3);
-			sol=Rt*m;
-			sol=sol/sol(2);
-			return sol;
-		};
-		Marca(TBaseState state, int _id, float _z, float _x, float _y, float _rx, float _ry, float _rz)
-		{
-			QVec TagC(2);
-			TagC(0)=_z;
-			TagC(1)=_x;
-// 			QVec PlanoC(2);
-// 			PlanoC(0)=180;
-// 			PlanoC(1)=0;
-			QVec PlanoR(2);
-			PlanoR(0)=state.z;
-			PlanoR(1)=state.x;
-// 			QVec TagR = cambiarPlano(state.alpha,TagC,PlanoC);
-			QVec TagM = cambiarPlano(state.alpha,TagC,PlanoR);
-			id=_id;
-			x = TagM(1);
-			z = TagM(0);
-			y = _y;
-			rx = _rx;
-			rz = _rz;
-			ry = _ry;
-		};
-		string getString(){
-			string aux="id = "+to_string(id)+"\n";
-			aux += "x = "+to_string(x)+"\n";
-			aux += "z = "+to_string(z)+"\n";
-			aux += "y = "+to_string(y)+"\n";
-			aux += "rx = "+to_string(rx)+"\n";
-			aux += "rz = "+to_string(rz)+"\n";
-			aux += "ry = "+to_string(ry)+"\n";
-			return aux;
-		};
-	      };
-	struct listamarcas{
-		QMap<int,Marca> lista;
-		QMutex mutex;
-		void add(const tag &t, TBaseState state)
-		{
-			Marca m(state, t.id, t.tz, t.tx, t.ty, t.rx, t.ry, t.rz);
-			QMutexLocker ml(&mutex);
-			lista.insert(t.id,m);
-		};
-		Marca get(int id)
-		{
-			QMutexLocker ml(&mutex);
-			Marca m=lista.find(id).value();
-// 			lista.remove(id);
-// 			lista.clear();
-			return m;
-		};
-		void clear(){
-			QMutexLocker ml(&mutex);
-			lista.clear();
-		}
-		bool contains(int id)
-		{
-			QMutexLocker ml(&mutex);
-			return lista.contains(id);
-		}      
-	};
-	listamarcas marcas;
 };
 #endif
 
