@@ -90,8 +90,8 @@ private:
 	bool esquina();
 	void accionEsquina();
 	void accionNoEsquina();
-	void search();
-	void moverse();
+	void orientarse();
+	void buscar();
 	bool espaciolibre();
 	void newAprilTag(const tagsList &tags);
 	void writeinfo(string _info);

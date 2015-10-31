@@ -79,21 +79,22 @@ void SpecificWorker::compute()
 	std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 	std::sort( ldatacota.begin()+cota, ldatacota.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 	differentialrobot_proxy->getBaseState(state);
-	
+	if (marcas.contains(id_tag)&&st!=State::INIT)
+		st=State::ORIENTARSE;
 	switch(st)
 	{
 		case State::INIT:
 		      
 		      break;
 		case State::BUSCAR:
-		      moverse();
+		      buscar();
 		  break;
 		case State::ORIENTARSE:
-		      search();
+		      orientarse();
 		      break;
 	}
 }
-void SpecificWorker::moverse()
+void SpecificWorker::buscar()
 {
 	try
 	{
@@ -143,14 +144,15 @@ QVec cambiarinversoPlano(float alpha, QVec punto, QVec plano)
 	TagR=TagR/TagR(2);
 	return TagR;
 }
-void SpecificWorker::search()
+void SpecificWorker::orientarse()
 {	
 	try{
 		NavState s=controller_proxy->getState();
 		if(s.state=="FINISH"){
-			st=State::BUSCAR;
+			
 			sleep(1);
 			id_tag++;
+			st=State::BUSCAR;
 			return;
 		}
 		if(s.state=="IDLE"||s.state=="FINISH"||s.state=="WORKING"){
@@ -158,7 +160,6 @@ void SpecificWorker::search()
 				Marca m=marcas.get(id_tag);
 				RoboCompController::TargetPose t = {m.x,m.y,m.z};
 				controller_proxy->go(t);
-				
 			}
 			else
 			  st=State::BUSCAR;
@@ -311,11 +312,6 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
 	for (auto t :tags){
 	      marcas.add(t,state);
 	}
-// 	if(espaciolibre()){
-		st=State::ORIENTARSE;
-// 	}
-// 	else
-// 		st=State::BUSCAR;
 }
 void SpecificWorker::reloj()
 {
