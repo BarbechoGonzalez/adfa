@@ -158,7 +158,10 @@ void SpecificWorker::search()
 				Marca m=marcas.get(id_tag);
 				RoboCompController::TargetPose t = {m.x,m.y,m.z};
 				controller_proxy->go(t);
+				
 			}
+			else
+			  st=State::BUSCAR;
 
 		}
 	}
