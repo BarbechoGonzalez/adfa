@@ -71,15 +71,12 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	return true;
 }
 void SpecificWorker::compute()
-{	
-	RoboCompController::TargetPose t; 
-	controller_proxy->go(t);
-	ldata = laser_proxy->getLaserData();
+{	ldata = laser_proxy->getLaserData();
 	ldatacota = laser_proxy->getLaserData();
 	std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 	std::sort( ldatacota.begin()+cota, ldatacota.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 	differentialrobot_proxy->getBaseState(state);
-	if (marcas.contains(id_tag)&&st!=State::INIT)
+	if (marcas.contains(id_tag)&&st==State::BUSCAR)
 		st=State::ORIENTARSE;
 	switch(st)
 	{
@@ -151,14 +148,22 @@ void SpecificWorker::orientarse()
 		if(s.state=="FINISH"){
 			
 			sleep(1);
-			id_tag++;
+			
+			Marca m=marcas.get(id_tag);
 			st=State::BUSCAR;
-			return;
+			writeinfo("Hemos llegado al tag "+ to_string(m.id)+"\n"
+			+"  Time: "+to_string(LCDhor->intValue())+":"+to_string(LCDmin->intValue())+":"+to_string(LCDseg->intValue()));
+			writeinfo(m.getString());
+			id_tag++;
 		}
-		if(s.state=="IDLE"||s.state=="FINISH"||s.state=="WORKING"){
+		if(s.state=="IDLE"||s.state=="FINISH"/*||s.state=="WORKING"*/){
 			if (marcas.contains(id_tag)){
 				Marca m=marcas.get(id_tag);
-				RoboCompController::TargetPose t = {m.x,m.y,m.z};
+				RoboCompController::TargetPose t;
+				t.x=m.x;
+				t.y=m.y;
+				t.z=m.z;
+				writeinfo("Redirigiendo al tag "+ to_string(m.id)+":\n  Z: "+to_string(m.z)+" rad\n  X: "+to_string(m.x)+ "mm");
 				controller_proxy->go(t);
 			}
 			else
