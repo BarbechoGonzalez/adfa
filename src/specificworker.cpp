@@ -145,7 +145,7 @@ void SpecificWorker::orientarse()
 {	
 	try{
 		NavState s=controller_proxy->getState();
-		if(s.state=="FINISH"){
+		if(s.state=="FINISH"&&marcas.contains(id_tag)){
 			
 			sleep(1);
 			
@@ -156,13 +156,16 @@ void SpecificWorker::orientarse()
 			writeinfo(m.getString());
 			id_tag++;
 		}
-		if(s.state=="IDLE"||s.state=="FINISH"/*||s.state=="WORKING"*/){
+		if(s.state=="IDLE"||s.state=="FINISH"||s.state=="BLOCKED"||s.state=="WORKING"){
 			if (marcas.contains(id_tag)){
 				Marca m=marcas.get(id_tag);
 				RoboCompController::TargetPose t;
 				t.x=m.x;
 				t.y=m.y;
 				t.z=m.z;
+// 				t.x=3000;
+// 				t.y=0;
+// 				t.z=-1500;
 				writeinfo("Redirigiendo al tag "+ to_string(m.id)+":\n  Z: "+to_string(m.z)+" rad\n  X: "+to_string(m.x)+ "mm");
 				controller_proxy->go(t);
 			}
