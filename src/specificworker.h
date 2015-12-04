@@ -38,8 +38,12 @@
 #include <qt4/QtCore/qmutex.h>
 #include <qt4/QtGui/qplaintextedit.h>
 #include <qt4/Qt/qdebug.h>
+#include <qt4/Qt/qvarlengtharray.h>
 #include <listamarcas.h>
+#include <lemon/list_graph.h>
 
+
+using namespace lemon;
 
 const double EulerC=std::exp(1.0);
 class SpecificWorker : public GenericWorker
@@ -52,50 +56,81 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 public slots:
 	void compute();
-	void pintarRobot();
+	
 	void reloj();
 	void iniciar();
 	void parar();
-	void reset();
-	void slidercota(int val);
-	void slidervelL(int val);
-	void slidervelG(int val);
-	void sliderdisS(int val);
-	void sliderdisG(int val);
+// 	void reset();
 private:
 //=====================Variables==================
 	int id_tag;
-	float rot;		//VELOCIDAD DE GIRO rad/s
-	bool giro;		//CONTROL DEL SENTIDO DE GIRO
 	bool startbutton;	//BOTON DE STARTINICIADO
 	MyQTimer clk;
 	QGraphicsScene *scene;	//GRAFICOS DEL ROBOT
-	enum class State  { INIT, BUSCAR, ORIENTARSE} ;  
+	enum class State  { INIT, MAPEAR, ORIENTARSE} ;  
 	State st;
 	int cota;
 	int distsecurity;
 	float threshold;
 	int velmax;	//velocidad maxima del robot
 	float velmaxg;
+	
+	
 	TBaseState state;
 	RoboCompLaser::TLaserData ldata;
 	RoboCompLaser::TLaserData ldatacota;
 	listaMarcas marcas;
+	InnerModel *inner;
+	ListDigraph Grafo;
+	struct nodo{
+		float x;
+		float z;
+		void set_x_z(float _x,float _z){
+			x=_x;
+			z=_z;
+		};
+		void set_x(float _x){
+			x=_x;
+		};
+		void set_z(float _z){
+			z=_z;
+		};
+		float get_x(){
+			return x;
+		}; 
+		float get_z(){
+			return z;
+		};
+		bool operator ==(const nodo &n){
+			return(this->x==n.x&&this->z==n.z);
+		};
+		nodo& operator =(const nodo &n ){
+			this->x=n.x;
+			this->z=n.z;
+			return *this;
+		};
+		float sqrt_nodo(nodo n1){
+			float x = n1.x-this->x;
+			float z = n1.z-this->z;
+			return sqrt(x*x+z*z);
+		};
+	};
+	ListDigraph::NodeMap<nodo> *map;
+	ListDigraph::ArcMap<float> *cost;
+	nodo anterior;
+	
+	
+	
 
 	//=====================Funciones==================  
-	int getvelocidadl(float distmin, float dist);
-	float getvelocidadg(float angle, int dismax, int dis);
-	int getdistmin(int dismax, float angle);
-	void getAprilTags();
+	QVec Seleccionarobjetivo();
+	void mapear();
 	bool esquina();
 	void accionEsquina();
-	void accionNoEsquina();
-	void orientarse();
-	void buscar();
-	bool espaciolibre();
 	void newAprilTag(const tagsList &tags);
 	void writeinfo(string _info);
 	void writeinfoTag(string _info);
+	void pintarRobot(nodo origen, nodo destino);
 };
 #endif
 

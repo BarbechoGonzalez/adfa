@@ -29,22 +29,13 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	connect(Start, SIGNAL(clicked()), this, SLOT(iniciar()));
 	connect(Stop, SIGNAL(clicked()), this, SLOT(parar()));
-	connect(Reset, SIGNAL(clicked()), this, SLOT(reset()));
+// 	connect(Reset, SIGNAL(clicked()), this, SLOT(reset()));
 	connect(&clk, SIGNAL(senal()), this, SLOT(reloj()));
-	connect(&clk, SIGNAL(senal2()), this ,SLOT(pintarRobot()));
-	
-	connect(cotavision,SIGNAL(sliderMoved(int)),this,SLOT(slidercota(int)));
-	connect(vellmax,SIGNAL(sliderMoved(int)),this,SLOT(slidervelL(int)));
-	connect(velgmax,SIGNAL(sliderMoved(int)),this,SLOT(slidervelG(int)));
-	connect(distanciadeseguridad,SIGNAL(sliderMoved(int)),this,SLOT(sliderdisS(int)));
-	connect(distanciadegiro,SIGNAL(sliderMoved(int)),this,SLOT(sliderdisG(int)));
 	
 	clk.setseg(1000);
 	scene =  new QGraphicsScene();
 	Grafico->setScene(scene);
 	startbutton=false;
-	giro=false;
-	rot=1.2;
 	clk.start();
 	st=State::INIT;
 	id_tag=0;
@@ -53,17 +44,23 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	threshold = 400;
 	velmax=270;	//velocidad maxima del robot
 	velmaxg=1.5;
-	slidercota(cota);
-	sliderdisG(threshold);
-	sliderdisS(distsecurity);
-	slidervelG(velmaxg*10);
-	slidervelL(velmax);
+	inner = new InnerModel("/home/ivan/robocomp/files/innermodel/simpleworld.xml");
+// 	inner = new InnerModel("/home/ivan/robocomp/files/innermodel/RoCKIn@home/world/apartment.xml");
+	map = new ListDigraph::NodeMap<nodo>(Grafo);
+	cost = new ListDigraph::ArcMap<float>(Grafo);
+	differentialrobot_proxy->getBaseState(state);
+	anterior.set_x_z(state.x,state.z);
+	ListDigraph::Node  aux = Grafo.addNode();
+	(*map)[aux]=anterior;
+	pintarRobot( anterior, anterior);
+	differentialrobot_proxy->setOdometerPose(0,0,state.alpha);
 }
 
 /**
 * \brief Default destructor
 */
-SpecificWorker::~SpecificWorker(){}
+SpecificWorker::~SpecificWorker(){  
+}
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
@@ -71,191 +68,98 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	return true;
 }
 void SpecificWorker::compute()
-{	ldata = laser_proxy->getLaserData();
+{	
+	ldata = laser_proxy->getLaserData();
 	ldatacota = laser_proxy->getLaserData();
 	std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 	std::sort( ldatacota.begin()+cota, ldatacota.end()-cota, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return (a.dist < b.dist); }) ;  //sort laser data from small to $
 	differentialrobot_proxy->getBaseState(state);
-	if (marcas.contains(id_tag)&&st==State::BUSCAR)
-		st=State::ORIENTARSE;
+ 	inner->updateTransformValues("base",state.x,0,state.z,0,state.alpha,0);
 	switch(st)
 	{
 		case State::INIT:
-		      
+		  
 		      break;
-		case State::BUSCAR:
-		      buscar();
-		  break;
-		case State::ORIENTARSE:
-		      orientarse();
-		      break;
-	}
-}
-void SpecificWorker::buscar()
-{
-	try
-	{
-  /*=================================DETECTA LAS ESQUINAS===================================*/
-		if(esquina())
-		{
-			accionEsquina();
-		}
-  /*========================================================================================*/
-  /*==================================SI NO ES UNA ESQUINA==================================*/
-		else
-		{
-			accionNoEsquina();
-		}
-// 		if(espaciolibre()){
-// 			st=State::ORIENTARSE;
-// 		}
-// 		else
-// 			st=State::BUSCAR;
-	}
-	catch(const Ice::Exception &ex)
-	{
-		writeinfo("ex");
-	}
-  
-}
-QVec cambiarinversoPlano(float alpha, QVec punto, QVec plano)
-{
-	QMat Rt(3,3);
-	Rt(0,0)=cos(alpha);
-	Rt(0,1)=-sin(alpha);
-	Rt(0,2)=plano(0);
-	Rt(1,0)=sin(alpha);
-	Rt(1,1)=cos(alpha);
-	Rt(1,2)=plano(1);
-	Rt(2,0)=0;
-	Rt(2,1)=0;
-	Rt(2,2)=1;
-	QVec m(3);
-	m(0)=punto(0);
-	m(1)=punto(1);
-	m(2)=1;
-	QMat Rtinver=Rt.invert();
-	
-	QVec TagR(3);
-	TagR=Rtinver*m;
-	TagR=TagR/TagR(2);
-	return TagR;
-}
-void SpecificWorker::orientarse()
-{	
-	try{
-		NavState s=controller_proxy->getState();
-		if(s.state=="FINISH"&&marcas.contains(id_tag)){
-			
-			sleep(1);
-			
-			Marca m=marcas.get(id_tag);
-			st=State::BUSCAR;
-			writeinfo("Hemos llegado al tag "+ to_string(m.id)+"\n"
-			+"  Time: "+to_string(LCDhor->intValue())+":"+to_string(LCDmin->intValue())+":"+to_string(LCDseg->intValue()));
-			writeinfo(m.getString());
-			id_tag++;
-		}
-		if(s.state=="IDLE"||s.state=="FINISH"||s.state=="BLOCKED"||s.state=="WORKING"){
-			if (marcas.contains(id_tag)){
-				Marca m=marcas.get(id_tag);
-				RoboCompController::TargetPose t;
-				t.x=m.x;
-				t.y=m.y;
-				t.z=m.z;
-// 				t.x=3000;
-// 				t.y=0;
-// 				t.z=-1500;
-				writeinfo("Redirigiendo al tag "+ to_string(m.id)+":\n  Z: "+to_string(m.z)+" rad\n  X: "+to_string(m.x)+ "mm");
-				controller_proxy->go(t);
+		case State::MAPEAR:
+			 if(esquina())
+			{
+				accionEsquina();
 			}
 			else
-			  st=State::BUSCAR;
-
+			{
+				mapear();
+			}
+		  break;
+		case State::ORIENTARSE:
+			  NavState s=controller_proxy->getState();
+			  if(s.state=="FINISH"||s.state=="IDLE"){
+			  
+				st=State::MAPEAR;
+			  }
+		   break;
+	}
+}
+void SpecificWorker::mapear()
+{
+	QVec p=Seleccionarobjetivo();
+	float z= p(2);
+	float x= p(0);
+	
+	
+	cout<<x<<","<<z<<endl;
+	writeinfo("Point = ("+to_string(p(0))+","+to_string(p(2))+")");
+	ListDigraph::Node  nodonuevo = Grafo.addNode();		
+	
+	nodo nuevo;
+	nuevo.set_x_z(x,z);
+	(*map)[nodonuevo]=nuevo;
+	for(ListDigraph::NodeIt n(Grafo); n!=INVALID;++n)
+	{
+		if((*map)[n]==anterior)
+		{
+			ListDigraph::Arc a=Grafo.addArc(n,nodonuevo);
+			nodo origen = (*map)[n];
+			nodo destino =(*map)[nodonuevo];
+			float x = origen.get_x()-destino.get_x();
+			float z = origen.get_z()-destino.get_z() ;
+			(*cost)[a]=sqrt(x*x+z*z);
+			break;
 		}
 	}
-	catch(const Ice::Exception &ex)
-	{
-		qDebug()<<"ex";
+	pintarRobot( anterior, nuevo);
+	anterior.set_x_z(x,z);
+	RoboCompController::TargetPose t;
+	t.x=p(0);
+	t.z=p(2);
+	t.y=0;
+	controller_proxy->go(t);
+	
+	st=State::ORIENTARSE;
+	
+}
+
+QVec SpecificWorker::Seleccionarobjetivo(){
+	nodo n;
+	 
+	QVec dist=QVec::zeros(ldata.size());
+	for(int i=0;i<ldata.size();i++){
+		float angle=ldata[i].angle;
+		float dista =ldata[i].dist;
+		n.set_x_z(dista*sin(angle),dista*cos(angle));
+		float dismin=std::numeric_limits<float>::max();
+		for(ListDigraph::NodeIt aux(Grafo); aux!=INVALID;++aux){
+			nodo n_G = (*map)[aux];
+			if(dismin>n_G.sqrt_nodo(n))
+				dismin=n_G.sqrt_nodo(n);
+		}
+		dist(i) = dismin +ldata[i].dist;
 	}
-/*	
-// 	static int min;
-// 	static bool encontrado=false;
-// 	if(marcas.contains(id_tag)){
-// 		Marca m=marcas.get(id_tag);
-// 		float rot=0;
-// 		float distaux=(ldatacota.data()+cota)->dist;
-// 		int distmax=0;
-// 		int vel=getvelocidadl(distmax,distaux);		
-// 		QVec plano(2);
-// 		plano(0)=state.z;
-// 		plano(1)=state.x;
-// 		QVec punto(2);
-// 		punto(0)=m.z;
-// 		punto(1)=m.x;
-// 		QVec tagR=cambiarinversoPlano(state.alpha,punto,plano);
-// // 		QVec plano2(2);
-// // 		plano(0)=180;
-// // 		plano(1)=0;
-// // 		QVec tagC=cambiarinversoPlano(state.alpha,tagR,plano2);
-// 		if(espaciolibre()){	
-// 			rot=atan2(tagR(1),tagR(0))*2;
-// 			differentialrobot_proxy->setSpeedBase(vel,rot);
-// 		}
-// 		
-// 		
-// 		float distance=(sqrt((state.x-m.x)*(state.x-m.x)+(state.z-m.z)*(state.z-m.z)));
-// 		writeinfoTag("Redirigiendo al tag "+ to_string(m.id)+":\n  Giro: "+to_string(rot)+" rad\n  Distancia: "+to_string(distance)+ "mm");
-// 		encontrado=false;
-// 		if(distance<750){
-// 			min=LCDmin->intValue();
-// 			id_tag++;
-// 			differentialrobot_proxy->setSpeedBase(0,0);
-// 			writeinfo("Hemos llegado al tag "+ to_string(m.id)+"\n  Distancia: "+to_string(distance)+ "mm\n"
-// 			+"  Time: "+to_string(LCDhor->intValue())+":"+to_string(LCDmin->intValue())+":"+to_string(LCDseg->intValue()));
-// 			writeinfo(m.getString());
-// 			sleep(2);
-// 			encontrado=true;
-// 			marcas.clear();
-// 		}
-// 	}
-// 	else
-// 		writeinfoTag("No se ve el tag: "+ to_string(id_tag));
-// 	if(LCDmin->intValue()==min+5&&encontrado){
-// 		id_tag=0;
-// 		writeinfo("Comenzamos de nuevo por exceso de tiempo");
-// 		encontrado=false;
-// 	}
-// 	st=State::BUSCAR;*/
+	int j;
+	float m=dist.max(j);
+	QVec p=inner->laserTo("world","laser",ldata[j].dist-420,ldata[j].angle);
+	return p;
 }
-int SpecificWorker::getvelocidadl(float distmin, float dist)
-{
-  	if(dist<distmin){
-		return velmax*tanh(dist/distmin);
-	}
-	else
-		return velmax;
-}
-float SpecificWorker::getvelocidadg(float angle, int dismax, int dis)
-{
-	if(dis<dismax){
-		float resul;
-		float aux=M_PI*angle*angle;
-		resul = 1+velmaxg*(pow(EulerC,-(aux)));	      
-		if (angle>0&&!giro)
-			resul=-resul;
-		return resul;
-	}
-	else return 0;
-}
-int SpecificWorker::getdistmin(int dismax,float angle)
-{
-	float aux=M_PI*angle*angle;
-	return 300+dismax*(pow(EulerC,-(aux)));
-}
-void SpecificWorker::getAprilTags()
-{
-}
+
 bool SpecificWorker::esquina()
 {
 	RoboCompLaser::TLaserData ldataaux = laser_proxy->getLaserData();
@@ -270,51 +174,10 @@ void SpecificWorker::accionEsquina()
 	RoboCompLaser::TLaserData ldataaux = laser_proxy->getLaserData();  //read laser data
 	if(ldataaux.data()->dist<(ldataaux.data()+99)->dist)
 		sentido=-sentido;
-	differentialrobot_proxy->setSpeedBase(0, (sentido));			//GIRA SOBRE SÍ MISMO
+	differentialrobot_proxy->setSpeedBase(0, sentido);			//GIRA SOBRE SÍ MISMO
 	usleep(1000000);
-	giro=false;
+	differentialrobot_proxy->setSpeedBase(0, 0);
 }
-void SpecificWorker::accionNoEsquina()
-{	
-	float distaux = 0;
-	float angle = 0;
-	if(marcas.contains(id_tag))
-	{
-		distaux=(ldata.data())->dist;			//DISTANCIA MINIMA A LA PARED
-		angle=(ldata.data())->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
-	}
-	else
-	{
-		distaux=(ldatacota.data()+cota)->dist;			//DISTANCIA MINIMA A LA PARED
-		angle=(ldatacota.data()+cota)->angle;				//ANGULO AL QUE SE ENCUENTRA LA DISTANCIA MINIMA
-	}
-	int distmax=getdistmin(threshold,angle);			//CALCULA LA DISTANCIA A LA QUE DEBE DE GIRAR
-	int vel=getvelocidadl(distmax,distaux);			//CALCULA LA VELOCIDAD LINEAL
-	rot=getvelocidadg(angle,distmax,distaux);
-	if(rot<0)
-		giro=false;						//CONTROL DEL SENTIDO DE GIRO
-	if(distaux<distmax){
-		rot=getvelocidadg(angle,distmax,distaux);		//CALCULA EL ANGULO DE GIRO
-		differentialrobot_proxy->setSpeedBase(vel, rot);	//ESTABLECE LA VELOCIDAD Y LA ROTACION SI SE INCUMPLE LA DISTANCIA
-// 		marcas.clear();
-// 		st=State::BUSCAR;
-	}
-/*===========================GIRA CUANDO ESTA EN UNA DISTANCIA DE SEGURIDAD===============================*/
-	else
-		differentialrobot_proxy->setSpeedBase(vel, 0);
-  
-}
-void SpecificWorker::pintarRobot()
-{	
-	scene->addRect(state.x/10,-state.z/10,40,40,QPen(Qt::black),QBrush(Qt::black));
-}
-
-
-bool SpecificWorker::espaciolibre()
-{
-	return(ldata.data()->dist>200);
-}
-
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {	
 	for (auto t :tags){
@@ -346,66 +209,23 @@ void SpecificWorker::reloj()
 }
 void SpecificWorker::iniciar()
 {
-	st=State::BUSCAR;
+	st=State::MAPEAR;
+	startbutton=true;
 }
 void SpecificWorker::parar()
 {
+	startbutton=false;
 	st=State::INIT;
 	differentialrobot_proxy->setSpeedBase(0, 0);
-}
-void SpecificWorker::reset()
-{
-	slidercota(16);
-	sliderdisG(400);
-	sliderdisS(440);
-	slidervelG(22);
-	slidervelL(350);
-	cotavision->setValue(16);
-	vellmax->setValue(350);
-	velgmax->setValue(22);
-	distanciadeseguridad->setValue(440);
-	distanciadegiro->setValue(400);
-	
-}
-void SpecificWorker::slidercota(int val)
-{
-	cota=val;
-	QString s=QString::number(val);
-	Lcota->setText(s);
-}
-void SpecificWorker::sliderdisG(int val)
-{
-	threshold=val;
-	QString s=QString::number(val);
-	LdisG->setText(s);
-}
-void SpecificWorker::sliderdisS(int val)
-{
-	distsecurity=val;
-	QString s=QString::number(val);
-	LdisS->setText(s);
-}
-void SpecificWorker::slidervelG(int val)
-{
-	velmaxg=val/10;
-	QString s;
-	s.setNum(val/10);
-	Lvelg->setText(s);
-}
-void SpecificWorker::slidervelL(int val)
-{
-	velmax=val;
-	QString s=QString::number(val);
-	Lvell->setText(s);
-}
-void SpecificWorker::writeinfoTag(string _info)
-{	
-	InfoTag->clear();
-	QString *text=new QString(_info.c_str());
-	InfoTag->append(*text);
 }
 void SpecificWorker::writeinfo(string _info)
 {	
 	QString *text=new QString(_info.c_str());
 	InfoText->append(*text);
-}  
+} 
+void SpecificWorker::pintarRobot(nodo origen, nodo destino)
+{	
+// 	scene->addRect(state.x/10,-state.z/10,40,40,QPen(Qt::black),QBrush(Qt::black));
+	scene->addLine(origen.x/10, -origen.z/10, destino.x/10, -destino.z/10, QPen(Qt::black));
+	scene->addEllipse(destino.x/10-15, -destino.z/10-15, 30, 30, QPen(Qt::white), QBrush(Qt::black));
+}

@@ -213,7 +213,6 @@ src/CMakeFiles/controller.dir/apriltagsI.cpp.o: /usr/include/qt4/QtGui/QPalette
 src/CMakeFiles/controller.dir/apriltagsI.cpp.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/apriltagsI.cpp.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/apriltagsI.cpp.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/apriltagsI.cpp.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/apriltagsI.cpp.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/apriltagsI.cpp.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/apriltagsI.cpp.o: /usr/include/qt4/QtGui/QVector3D
@@ -657,7 +656,6 @@ src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o: /usr/include/qt4/QtGui/QPal
 src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/commonbehaviorI.cpp.o: /usr/include/qt4/QtGui/QVector3D
@@ -1101,7 +1099,6 @@ src/CMakeFiles/controller.dir/genericmonitor.cpp.o: /usr/include/qt4/QtGui/QPale
 src/CMakeFiles/controller.dir/genericmonitor.cpp.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/genericmonitor.cpp.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/genericmonitor.cpp.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/genericmonitor.cpp.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/genericmonitor.cpp.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/genericmonitor.cpp.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/genericmonitor.cpp.o: /usr/include/qt4/QtGui/QVector3D
@@ -1543,7 +1540,6 @@ src/CMakeFiles/controller.dir/genericworker.cpp.o: /usr/include/qt4/QtGui/QPalet
 src/CMakeFiles/controller.dir/genericworker.cpp.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/genericworker.cpp.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/genericworker.cpp.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/genericworker.cpp.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/genericworker.cpp.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/genericworker.cpp.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/genericworker.cpp.o: /usr/include/qt4/QtGui/QVector3D
@@ -2545,7 +2541,6 @@ src/CMakeFiles/controller.dir/main.cpp.o: /usr/include/qt4/QtGui/QPalette
 src/CMakeFiles/controller.dir/main.cpp.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/main.cpp.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/main.cpp.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/main.cpp.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/main.cpp.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/main.cpp.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/main.cpp.o: /usr/include/qt4/QtGui/QVector3D
@@ -3178,7 +3173,6 @@ src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o: /usr/include/qt4/QtGui/QPale
 src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/moc_apriltagsI.cxx.o: /usr/include/qt4/QtGui/QVector3D
@@ -3622,7 +3616,6 @@ src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o: /usr/include/qt4/QtGui/
 src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/moc_commonbehaviorI.cxx.o: /usr/include/qt4/QtGui/QVector3D
@@ -4066,7 +4059,6 @@ src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o: /usr/include/qt4/QtGui/Q
 src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/moc_genericmonitor.cxx.o: /usr/include/qt4/QtGui/QVector3D
@@ -4508,7 +4500,6 @@ src/CMakeFiles/controller.dir/moc_genericworker.cxx.o: /usr/include/qt4/QtGui/QP
 src/CMakeFiles/controller.dir/moc_genericworker.cxx.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/moc_genericworker.cxx.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/moc_genericworker.cxx.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/moc_genericworker.cxx.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/moc_genericworker.cxx.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/moc_genericworker.cxx.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/moc_genericworker.cxx.o: /usr/include/qt4/QtGui/QVector3D
@@ -4959,7 +4950,6 @@ src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o: /usr/include/qt4/QtGui/
 src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/moc_specificmonitor.cxx.o: /usr/include/qt4/QtGui/QVector3D
@@ -5415,7 +5405,6 @@ src/CMakeFiles/controller.dir/moc_specificworker.cxx.o: /usr/include/qt4/QtGui/Q
 src/CMakeFiles/controller.dir/moc_specificworker.cxx.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/moc_specificworker.cxx.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/moc_specificworker.cxx.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/moc_specificworker.cxx.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/moc_specificworker.cxx.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/moc_specificworker.cxx.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/moc_specificworker.cxx.o: /usr/include/qt4/QtGui/QVector3D
@@ -5867,7 +5856,6 @@ src/CMakeFiles/controller.dir/specificmonitor.cpp.o: /usr/include/qt4/QtGui/QPal
 src/CMakeFiles/controller.dir/specificmonitor.cpp.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/specificmonitor.cpp.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/specificmonitor.cpp.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/specificmonitor.cpp.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/specificmonitor.cpp.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/specificmonitor.cpp.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/specificmonitor.cpp.o: /usr/include/qt4/QtGui/QVector3D
@@ -6323,7 +6311,6 @@ src/CMakeFiles/controller.dir/specificworker.cpp.o: /usr/include/qt4/QtGui/QPale
 src/CMakeFiles/controller.dir/specificworker.cpp.o: /usr/include/qt4/QtGui/QPlatformWindow
 src/CMakeFiles/controller.dir/specificworker.cpp.o: /usr/include/qt4/QtGui/QPrinter
 src/CMakeFiles/controller.dir/specificworker.cpp.o: /usr/include/qt4/QtGui/QPushButton
-src/CMakeFiles/controller.dir/specificworker.cpp.o: /usr/include/qt4/QtGui/QSlider
 src/CMakeFiles/controller.dir/specificworker.cpp.o: /usr/include/qt4/QtGui/QTextEdit
 src/CMakeFiles/controller.dir/specificworker.cpp.o: /usr/include/qt4/QtGui/QTransform
 src/CMakeFiles/controller.dir/specificworker.cpp.o: /usr/include/qt4/QtGui/QVector3D

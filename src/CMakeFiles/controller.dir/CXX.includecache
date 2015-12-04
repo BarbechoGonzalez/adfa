@@ -37,7 +37,11 @@ qt4/QtGui/qplaintextedit.h
 -
 qt4/Qt/qdebug.h
 -
+qt4/Qt/qvarlengtharray.h
+-
 listamarcas.h
+-
+lemon/list_graph.h
 -
 
 /opt/robocomp/include/innermodel/innermodel.h
@@ -1755,10 +1759,6 @@ qprinter.h
 /usr/include/qt4/QtGui/QPushButton
 qpushbutton.h
 /usr/include/qt4/QtGui/qpushbutton.h
-
-/usr/include/qt4/QtGui/QSlider
-qslider.h
-/usr/include/qt4/QtGui/qslider.h
 
 /usr/include/qt4/QtGui/QTextEdit
 qtextedit.h
@@ -4256,8 +4256,6 @@ QtGui/QLCDNumber
 QtGui/QLabel
 -
 QtGui/QPushButton
--
-QtGui/QSlider
 -
 QtGui/QTextEdit
 -
